@@ -1,0 +1,11 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore key files
+privatekey
+publickey
+
+# Ignore config files
+wg0.conf
+coord_server/requirements.txt
