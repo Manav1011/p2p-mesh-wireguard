@@ -129,11 +129,11 @@ async def peer_agent():
                             if data.get('event') == 'peer_update':
                                 new_peers = data['peers']
                                 new_config = generate_wg_config(priv, internal_ip, listen_port, new_peers)
-                                with open('wg0.conf', 'r') as f:
-                                    current_config = f.read()
-                                if not configs_equal(current_config, new_config):
-                                    print('Peer list changed, updating config and reloading WireGuard...')
-                                    save_and_apply_config(new_config)
+                                print('--- DEBUG: Received peer_update event ---')
+                                print('New peer list:', json.dumps(new_peers, indent=2))
+                                print('Regenerating WireGuard config...')
+                                save_and_apply_config(new_config)
+                                print('WireGuard config applied and interface reloaded.')
                                 print_peer_table(new_peers, internal_ip)
 
                     ws_task = asyncio.create_task(ws_receiver())
