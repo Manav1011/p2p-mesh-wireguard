@@ -88,7 +88,10 @@ async def peer_agent():
     listen_port = int(input('WireGuard listen port (e.g. 54320): ').strip())
     priv, pub = generate_keys()
     ext_ip, ext_port = get_public_info()
-    reg = register_with_server(server_url, group, name, pub, ext_ip, listen_port)
+    if ext_ip is None or ext_port is None:
+        print('Could not determine external IP/port. Exiting.')
+        return
+    reg = register_with_server(server_url, group, name, pub, ext_ip, ext_port)
     internal_ip = reg['internal_ip']
     peers = reg['peers']
     config = generate_wg_config(priv, internal_ip, listen_port, peers)
