@@ -46,19 +46,24 @@ async def register_peer(peer: PeerRegister):
     if group not in groups:
         groups[group] = {}
         ws_connections[group] = []
-    
-    # Check if peer with same public key already exists
+
+    # Uniqueness: public_key + external_ip + external_port
     existing_peer_id = None
     for pid, pinfo in groups[group].items():
-        if pinfo['public_key'] == peer.public_key:
+        if (
+            pinfo['public_key'] == peer.public_key and
+            pinfo['external_ip'] == peer.external_ip and
+            pinfo['external_port'] == peer.external_port
+        ):
             existing_peer_id = pid
             break
-    
+
     if existing_peer_id:
         # Update existing peer
+        groups[group][existing_peer_id]["name"] = peer.name
+        # Optionally update external_ip/port if changed
         groups[group][existing_peer_id]["external_ip"] = peer.external_ip
         groups[group][existing_peer_id]["external_port"] = peer.external_port
-        groups[group][existing_peer_id]["name"] = peer.name
         peer_id = existing_peer_id
         internal_ip = groups[group][existing_peer_id]["internal_ip"]
     else:
@@ -81,7 +86,7 @@ async def register_peer(peer: PeerRegister):
             "external_port": peer.external_port
         }
         groups[group][peer_id] = peer_info
-    
+
     # Notify via websocket
     for ws in ws_connections[group]:
         await ws.send_json({"event": "peer_update", "peers": list(groups[group].values())})
